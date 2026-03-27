@@ -22,6 +22,10 @@ public class HospitalMemoryPanel extends JPanel {
 
     public HospitalMemoryPanel(String name) {
         // 2. สร้างปุ่ม Skip และตั้งค่าตำแหน่ง
+        this.savedName = name;
+        setBackground(Color.BLACK);
+        setLayout(null);
+
         skipBtn = new JButton("SKIP >>");
         skipBtn.setBounds(650, 500, 100, 35); // ปรับ x, y ตามความเหมาะสม
         skipBtn.setFocusable(false);
