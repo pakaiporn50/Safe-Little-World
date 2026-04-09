@@ -10,17 +10,17 @@ public class VideoPanel extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Color.BLACK);
 
-        // 🎬 1. เริ่มต้น: แสดงแอนิเมชันอันแรก (Endgood.gif) แบบเต็มจอ 800x600
+        // 1.เริ่มต้น: แสดงแอนิเมชันอันแรก (Endgood.gif) แบบเต็มจอ 800x600
         java.net.URL img1 = getClass().getResource("/images/Endgood.gif");
         if (img1 != null) {
             // ใช้ ImageIcon ตรงๆ จาก URL เลย ไม่ต้องผ่าน Image scaled
             label = new JLabel(new ImageIcon(img1));
             add(label, BorderLayout.CENTER);
         }
-        // ⏳ 2. ตั้งเวลาเปลี่ยนจากคลิปที่ 1 เป็นคลิปที่ 2 (สมมติ 5 วินาที)
+        //2. ตั้งเวลาเปลี่ยนจากคลิปที่ 1 เป็นคลิปที่ 2
         Timer timer1 = new Timer(8000, e -> {
 
-            // 🎵 3. หยุดเพลงเก่า และรอ 0.8 วินาทีค่อยเริ่มเพลงใหม่ (ตามที่คุณตั้งไว้)
+            //  หยุดเพลงเก่า และรอ 10 วินาทีค่อยเริ่มเพลงใหม่
             MusicPlayer.stop();
             Timer songDelay = new Timer(1000, ev -> {
                 MusicPlayer.play("/images/goodsong.wav");
@@ -28,7 +28,7 @@ public class VideoPanel extends JPanel {
             });
             songDelay.start();
 
-            // 🎬 4. เปลี่ยนเป็นคลิปที่ 2 (Endgood2.gif) แบบเต็มจอ 800x600
+            // 4. เปลี่ยนเป็นคลิปที่ 2 (Endgood2.gif) แบบเต็มจอ 800x600
             java.net.URL img2 = getClass().getResource("/images/Endgood2.gif");
             if (img2 != null) {
                 ImageIcon icon2 = new ImageIcon(img2);
@@ -39,7 +39,7 @@ public class VideoPanel extends JPanel {
             revalidate();
             repaint();
 
-            // ⏳ 5. ตั้งเวลาสุดท้าย: พอคลิปที่สองเล่นจบ (42 วินาที) ให้ไปหน้าจบ
+            // 5. ตั้งเวลาสุดท้าย: พอคลิปที่สองเล่นจบ (42 วินาที) ให้ไปหน้าจบ
             Timer timer2 = new Timer(42000, ev -> {
                 MusicPlayer.stop(); // หยุดเพลงตอนจบเกม
                 JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);

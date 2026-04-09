@@ -45,7 +45,7 @@ public class AnimationPanel extends JPanel {
 
         JFrame topFrame = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, this);
         if (topFrame != null) {
-            // ➡️ ส่งไปที่ฉากเฉลยปมพ่อแม่ก่อนเริ่มเกม
+            // ส่งไปที่ฉากเฉลยปมพ่อแม่ก่อนเริ่มเกม
             topFrame.setContentPane(new IntroPanel());
             topFrame.revalidate();
             topFrame.repaint();

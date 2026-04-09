@@ -1,16 +1,16 @@
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.AlphaComposite;
+import javax.swing.*;//สร้างหน้าต่าง
+import java.awt.*;//วาดภาพและจัดวาง)
+import java.awt.event.*;//รับค่า
+import java.awt.AlphaComposite;//จัดการความโปร่งใสและการผสมสีของภาพ"
 
-public class GamePanel extends JPanel implements KeyListener {
+public class GamePanel extends JPanel implements KeyListener {     //รับค่าแป้นพิมพ์ด้วย แล้วก็สร้างคลาสแม่
 
-    // --- Variables ---
+    // กำหนด
     Image player, playerFront, playerBack;
     Image background1, background2, background3, background4, background5, background6, background7;
     Image cat, frog, giraffe, rabbit, turtle, capybara;
 
-    float alpha = 0f;
+    float alpha = 0f;//ความโปร่งแสง
     Timer fadeTimer;
 
     int playerX = 100, playerY = 300;
@@ -21,7 +21,7 @@ public class GamePanel extends JPanel implements KeyListener {
     int catX = 600, catY = 250, frogX = 400, frogY = 350, giraffeX = 500, giraffeY = 150;
     int rabbitX = 350, rabbitY = 380, turtleX = 200, turtleY = 400, capybaraX = 500, capybaraY = 350;
 
-    // State Flags
+    //สถานะการสนทนาและการเข้าใกล้ตัวละคร
     boolean talking = false;
     boolean nearCat = false, nearFrog = false, nearGiraffe = false, nearRabbit = false, nearTurtle = false, nearCapybara = false;
     int questionIndex = 0;
@@ -34,35 +34,39 @@ public class GamePanel extends JPanel implements KeyListener {
     int endChoiceIndex = 0;
 
     // ---------- บทสนทนา ----------
-    String[] catDialogue = { "เรา: ที่นี่ที่ไหน?", "แมวส้ม: สวัสดี ฉันชื่อแมวส้ม", "แมวส้ม: คุณชื่ออะไรหรอ?", "แมวส้ม: ยินดีที่ได้รู้จักนะ ", "แมวส้ม: ตอนนี้เราอยู่ในโลกของความฝันนะ", "แมวส้ม: รู้ใช่ไหมว่าโลกความจริงมันโหดร้าย", "แมวส้ม: มาอยู่ที่นี่ต่อดีกว่า" };
-    String[] frogDialogue = { "กบ: เธอยังกล้าสบตาตัวเองในกระจกอยู่ไหม?", "กบ: ทุกครั้งที่เธอบอกคนอื่นว่า 'ไม่เป็นไร'", "กบ: ข้างในนั้น มันแตกสลายไปจนนับชิ้นไม่ถ้วนแล้วใช่ไหม?", "กบ: ไหนลองบอกความจริงที่เธอ 'ขยะแขยง' ที่สุดมาสักเรื่องสิ", "กบ: หึ ก็น่าสมเพชดีนะ", "กบ: เดินต่อไปสิ ไปดูว่าความฝันนี้จะหลอกให้เธอมีความสุขได้นานแค่ไหน" };
-    String[] giraffeDialogue = { "ยีราฟ: เดินมาไกลขนาดนี้ เพื่ออะไรกันล่ะ?", "ยีราฟ: มองลงมาจากที่สูงแบบนี้ ฉันเห็นแต่ความว่างเปล่าในแววตาเธอ", "ยีราฟ: " + playerName + " เธอยัง อยากเดินไปต่ออีกหรอ ? " };
-    String[] rabbitDialogue = { "กระต่าย: ดอกไม้ที่นี่ มันสวยสู้ดอกไม้ในโลกความจริงของเธอได้ไหม?", "กระต่าย: ฉันเห็นเธอมองมาที่ฉัน เธออยากจะกอดฉันเหมือนตอนเด็กๆ หรือเปล่า?", "กระต่าย: " + playerName + " มี 'คำพูด' ไหนที่เธออยากได้ยินที่สุดไหม?", "กระต่าย: เป็นคำที่ฟังดูอบอุ่นจังเลยนะ", "กระต่าย: อยู่ที่นี่นานอีกหน่อยสิ ดอกไม้กำลังจะบานเพื่อเธอแล้วล่ะ" };
-    String[] turtleDialogue = { "เต่า: จะรีบไปไหนหรอ?", "เต่า: ทุกคนที่วิ่งผ่านฉันไป สุดท้ายก็ต้องไปหยุดพักที่ไหนสักแห่งอยู่ดี", "เต่า: ปลายทางที่เธอพยายามวิ่งไปหาแทบตาย มันมีอยู่จริง หรือเธอแค่หลอกตัวเอง?", "เต่า: ค่อยๆ เดินเถอะ เพราะไม่ว่าจะถึงช้าหรือเร็ว ความเจ็บปวดก็รอเธออยู่เท่าเดิม" };
-    String[] capyDialogue = {
-            "คาปิบารา: เดินมาจนถึงจุดสิ้นสุดของความฝันแล้วนะ",
-            "คาปิบารา: โลกข้างนอกนั่นใจร้ายกับเธอมากเลยใช่ไหม?",
-            "คาปิบารา: " + playerName + "เธอแบกความเจ็บปวดมามากพอแล้ว",
-            "คาปิบารา: จะหลับฝันอยู่ที่นี่ตลอดไป หรือจะตื่นไปเผชิญหน้ากับความจริงอีกครั้ง?"
-    };
+    String[] catDialogue = {"เรา: ที่นี่ที่ไหน?", "แมวส้ม: สวัสดี ฉันชื่อแมวส้ม", "แมวส้ม: คุณชื่ออะไรหรอ?", "แมวส้ม: ยินดีที่ได้รู้จักนะ ", "แมวส้ม: ตอนนี้เราอยู่ในโลกของความฝันนะ", "แมวส้ม: รู้ใช่ไหมว่าโลกความจริงมันโหดร้าย", "แมวส้ม: มาอยู่ที่นี่ต่อดีกว่า"};
+    String[] frogDialogue = {"กบ: เธอยังกล้าสบตาตัวเองในกระจกอยู่ไหม?", "กบ: ทุกครั้งที่เธอบอกคนอื่นว่า 'ไม่เป็นไร'", "กบ: ข้างในนั้น มันแตกสลายไปจนนับชิ้นไม่ถ้วนแล้วใช่ไหม?", "กบ: ไหนลองบอกความจริงที่เธอ 'ขยะแขยง' ที่สุดมาสักเรื่องสิ", "กบ: หึ ก็น่าสมเพชดีนะ", "กบ: เดินต่อไปสิ ไปดูว่าความฝันนี้จะหลอกให้เธอมีความสุขได้นานแค่ไหน"};
+    String[] giraffeDialogue = {"ยีราฟ: เดินมาไกลขนาดนี้ เพื่ออะไรกันล่ะ?", "ยีราฟ: มองลงมาจากที่สูงแบบนี้ ฉันเห็นแต่ความว่างเปล่าในแววตาเธอ", "ยีราฟ: " + playerName + " เธอยัง อยากเดินไปต่ออีกหรอ ? "};
+    String[] rabbitDialogue = {"กระต่าย: ดอกไม้ที่นี่ มันสวยสู้ดอกไม้ในโลกความจริงของเธอได้ไหม?", "กระต่าย: ฉันเห็นเธอมองมาที่ฉัน เธออยากจะกอดฉันเหมือนตอนเด็กๆ หรือเปล่า?", "กระต่าย: " + playerName + " มี 'คำพูด' ไหนที่เธออยากได้ยินที่สุดไหม?", "กระต่าย: เป็นคำที่ฟังดูอบอุ่นจังเลยนะ", "กระต่าย: อยู่ที่นี่นานอีกหน่อยสิ ดอกไม้กำลังจะบานเพื่อเธอแล้วล่ะ"};
+    String[] turtleDialogue = {"เต่า: จะรีบไปไหนหรอ?", "เต่า: ทุกคนที่วิ่งผ่านฉันไป สุดท้ายก็ต้องไปหยุดพักที่ไหนสักแห่งอยู่ดี", "เต่า: ปลายทางที่เธอพยายามวิ่งไปหาแทบตาย มันมีอยู่จริง หรือเธอแค่หลอกตัวเอง?", "เต่า: ค่อยๆ เดินเถอะ เพราะไม่ว่าจะถึงช้าหรือเร็ว ความเจ็บปวดก็รอเธออยู่เท่าเดิม"};
+    String[] capyDialogue = {"คาปิบารา: เดินมาจนถึงจุดสิ้นสุดของความฝันแล้วนะ", "คาปิบารา: โลกข้างนอกนั่นใจร้ายกับเธอมากเลยใช่ไหม?", "คาปิบารา: " + playerName + "เธอแบกความเจ็บปวดมามากพอแล้ว", "คาปิบารา: จะหลับฝันอยู่ที่นี่ตลอดไป หรือจะตื่นไปเผชิญหน้ากับความจริงอีกครั้ง?"};
 
-    String[] currentQuestions;
-    JTextField answerField;
+    String[] currentQuestions;//เก็บข้อความ
+    JTextField answerField;//สร้างช่องตรงให้กรอกอ่ะ
 
     public GamePanel() {
-        setLayout(null); setFocusable(true); addKeyListener(this);
+        setLayout(null);
+        setFocusable(true);
+        addKeyListener(this);
         SwingUtilities.invokeLater(() -> requestFocusInWindow());
 
-        background1 = loadImage("/images/back1.jpg"); background2 = loadImage("/images/back2.png");
-        background3 = loadImage("/images/back3.jpg"); background4 = loadImage("/images/back4.png");
-        background5 = loadImage("/images/back5.gif"); background6 = loadImage("/images/back6.gif");
+        background1 = loadImage("/images/back1.jpg");
+        background2 = loadImage("/images/back2.png");
+        background3 = loadImage("/images/back3.jpg");
+        background4 = loadImage("/images/back4.png");
+        background5 = loadImage("/images/back5.gif");
+        background6 = loadImage("/images/back6.gif");
         background7 = loadImage("/images/back7 (2).jpg");
 
-        playerFront = loadImage("/images/main front.png"); playerBack = loadImage("/images/main back.png");
+        playerFront = loadImage("/images/main front.png");
+        playerBack = loadImage("/images/main back.png");
         player = playerFront;
-        cat = loadImage("/images/cat.gif"); frog = loadImage("/images/frog.gif");
-        giraffe = loadImage("/images/giraffe.gif"); rabbit = loadImage("/images/rabbit.gif");
-        turtle = loadImage("/images/turtle.gif"); capybara = loadImage("/images/capybara (2).gif");
+        cat = loadImage("/images/cat.gif");
+        frog = loadImage("/images/frog.gif");
+        giraffe = loadImage("/images/giraffe.gif");
+        rabbit = loadImage("/images/rabbit.gif");
+        turtle = loadImage("/images/turtle.gif");
+        capybara = loadImage("/images/capybara (2).gif");
 
         answerField = new JTextField();
         answerField.setBounds(250, 500, 300, 40);
@@ -70,7 +74,7 @@ public class GamePanel extends JPanel implements KeyListener {
         answerField.setVisible(false);
         add(answerField);
 
-        answerField.addActionListener(e -> {
+        answerField.addActionListener(e -> {//เก็บค่า
             if (scene == 1 && questionIndex == 2) {
                 playerName = answerField.getText();
                 catDialogue[3] = "แมวส้ม: ยินดีที่ได้รู้จักนะ " + playerName + "!";
@@ -79,39 +83,55 @@ public class GamePanel extends JPanel implements KeyListener {
                 capyDialogue[2] = "คาปิบารา: " + playerName + " เธอแบกความเจ็บปวดมามากพอแล้ว";
                 closeTextField();
             } else if (scene == 3 && questionIndex == 3) {
-                answerField.setText(""); closeTextField();
+                answerField.setText("");
+                closeTextField();
             } else if (scene == 5 && questionIndex == 2) {
                 String wish = answerField.getText();
                 rabbitDialogue[3] = "กระต่าย: '" + wish + "' เป็นคำที่ฟังดูอบอุ่นจังเลยนะ";
-                answerField.setText(""); closeTextField();
+                answerField.setText("");
+                closeTextField();
             }
         });
     }
 
     private void closeTextField() {
-        answerField.setVisible(false); questionIndex++;
-        this.requestFocusInWindow(); repaint();
-    }
+        answerField.setVisible(false);
+        questionIndex++;
+        this.requestFocusInWindow();
+        repaint();
+    }//ซ่อนกล่องข้อความหลังจากพิมพ์เส้จ
 
     private Image loadImage(String path) {
-        java.net.URL url = getClass().getResource(path);
+        java.net.URL url = getClass().getResource(path);//"ไปหารูปตามที่อยู่ที่บอกมานะ ถ้าหาเจอก็เอารูปมาให้ฉัน แต่ถ้าหาไม่เจอหรือพิมพ์ชื่อไฟล์ผิด ก็ไม่ต้องส่งอะไรกลับมา (ส่ง null) และอย่าเพิ่งพังนะ
         return (url == null) ? null : new ImageIcon(url).getImage();
-    }
+    }//ช่วยโหลดรูป เพราะมันมีปัญหาเรื่องการเอารูปเข้ามา เพื่อจะได้เรียกได้ง่ายๆ
 
     @Override
-    public void paintComponent(Graphics g) {
+    public void paintComponent(Graphics g) {//โทนสีฉาก
         super.paintComponent(g);
 
         if (scene == 1) g.drawImage(background1, 0, 0, 800, 600, null);
         if (scene == 2) g.drawImage(background2, 0, 0, 800, 600, null);
-        if (scene == 3) { g.drawImage(background3, 0, 0, 800, 600, null); g.setColor(new Color(20, 0, 40, 40)); g.fillRect(0, 0, 800, 600); }
+        if (scene == 3) {
+            g.drawImage(background3, 0, 0, 800, 600, null);
+            g.setColor(new Color(20, 0, 40, 40));
+            g.fillRect(0, 0, 800, 600);
+        }
         if (scene == 4) g.drawImage(background4, 0, 0, 800, 600, null);
-        if (scene == 5) { g.drawImage(background5, 0, 0, 800, 600, null); g.setColor(new Color(255, 182, 193, 20)); g.fillRect(0, 0, 800, 600); }
+        if (scene == 5) {
+            g.drawImage(background5, 0, 0, 800, 600, null);
+            g.setColor(new Color(255, 182, 193, 20));
+            g.fillRect(0, 0, 800, 600);
+        }
         if (scene == 6) g.drawImage(background6, 0, 0, 800, 600, null);
-        if (scene == 7) { g.drawImage(background7, 0, 0, 800, 600, null); g.setColor(new Color(100, 150, 200, 30)); g.fillRect(0, 0, 800, 600); }
+        if (scene == 7) {
+            g.drawImage(background7, 0, 0, 800, 600, null);
+            g.setColor(new Color(100, 150, 200, 30));
+            g.fillRect(0, 0, 800, 600);
+        }
 
         checkCollision();
-
+        //วาดตัวละครตามฉาก
         if (scene == 1) g.drawImage(cat, catX, catY, 100, 100, null);
         if (scene == 3) g.drawImage(frog, frogX, frogY, 80, 80, null);
         if (scene == 4) g.drawImage(giraffe, giraffeX, giraffeY, 150, 250, null);
@@ -129,14 +149,14 @@ public class GamePanel extends JPanel implements KeyListener {
 
         g.drawImage(player, playerX, playerY, 150, 150, null);
 
-        if (talking && currentQuestions != null && questionIndex < currentQuestions.length) {
+        if (talking && currentQuestions != null && questionIndex < currentQuestions.length) { //วาดกล่องคำพูด และตัวแปรที่ใช้เก็บชุดบทสนทนาที่กำลังใช้งานอยู่
             // วาดกล่องข้อความเหมือนเดิม
             g.setColor(new Color(0, 0, 0, 220));
             g.fillRect(50, 420, 700, 130);
             g.setColor(Color.WHITE);
             g.drawRect(50, 420, 700, 130);
 
-            g.setFont(new Font("Leelawadee UI", Font.BOLD, 18)); // แนะนำฟอนต์นี้ สระสวยกว่า
+            g.setFont(new Font("Leelawadee UI", Font.BOLD, 18));
 
             String text = currentQuestions[questionIndex];
             int x = 80;
@@ -148,22 +168,30 @@ public class GamePanel extends JPanel implements KeyListener {
         }
 
 
-        if (showGiraffeChoice) {
-            g.setColor(giraffeChoiceIndex == 0 ? Color.WHITE : new Color(50, 50, 50, 200)); g.fillRect(200, 250, 180, 50);
-            g.setColor(giraffeChoiceIndex == 0 ? Color.BLACK : Color.WHITE); g.drawString("ไปต่อ", 265, 282);
-            g.setColor(giraffeChoiceIndex == 1 ? Color.WHITE : new Color(50, 50, 50, 200)); g.fillRect(420, 250, 180, 50);
-            g.setColor(giraffeChoiceIndex == 1 ? Color.BLACK : Color.WHITE); g.drawString("เหนื่อยแล้ว", 460, 282);
+        if (showGiraffeChoice) { //ช้อยของยีราฟ
+            g.setColor(giraffeChoiceIndex == 0 ? Color.WHITE : new Color(50, 50, 50, 200));
+            g.fillRect(200, 250, 180, 50);
+            g.setColor(giraffeChoiceIndex == 0 ? Color.BLACK : Color.WHITE);
+            g.drawString("ไปต่อ", 265, 282);
+            g.setColor(giraffeChoiceIndex == 1 ? Color.WHITE : new Color(50, 50, 50, 200));
+            g.fillRect(420, 250, 180, 50);
+            g.setColor(giraffeChoiceIndex == 1 ? Color.BLACK : Color.WHITE);
+            g.drawString("เหนื่อยแล้ว", 460, 282);
         }
 
-        if (showEndChoice) {
+        if (showEndChoice) {//ช้อยฉากคาปิ
             g.setFont(new Font("Tahoma", Font.BOLD, 20));
-            g.setColor(endChoiceIndex == 0 ? Color.WHITE : new Color(30, 30, 30, 220)); g.fillRect(200, 250, 180, 60);
-            g.setColor(endChoiceIndex == 0 ? Color.BLACK : Color.WHITE); g.drawString("หลับฝันต่อไป", 235, 287);
-            g.setColor(endChoiceIndex == 1 ? Color.WHITE : new Color(30, 30, 30, 220)); g.fillRect(420, 250, 180, 60);
-            g.setColor(endChoiceIndex == 1 ? Color.BLACK : Color.WHITE); g.drawString("ออกจากฝัน", 460, 287);
+            g.setColor(endChoiceIndex == 0 ? Color.WHITE : new Color(30, 30, 30, 220));
+            g.fillRect(200, 250, 180, 60);
+            g.setColor(endChoiceIndex == 0 ? Color.BLACK : Color.WHITE);
+            g.drawString("หลับฝันต่อไป", 235, 287);
+            g.setColor(endChoiceIndex == 1 ? Color.WHITE : new Color(30, 30, 30, 220));
+            g.fillRect(420, 250, 180, 60);
+            g.setColor(endChoiceIndex == 1 ? Color.BLACK : Color.WHITE);
+            g.drawString("ออกจากฝัน", 460, 287);
         }
 
-        Graphics2D g2d = (Graphics2D) g;
+        Graphics2D g2d = (Graphics2D) g;// เอกเฟกค่อยๆหาย
         float curAlpha = Math.min(1.0f, Math.max(0.0f, alpha));
         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, curAlpha));
         g2d.setColor(Color.BLACK);
@@ -178,6 +206,7 @@ public class GamePanel extends JPanel implements KeyListener {
             g2d.drawString("control: [↑][↓][←][→] Move | [E] Talk", 25, 35);
         }
     }
+
     private void drawWrappedText(Graphics g, String text, int x, int y, int maxWidth) {
         FontMetrics fm = g.getFontMetrics();
         String[] words = text.split(" "); // แยกด้วยช่องว่าง (ถ้ามี)
@@ -203,9 +232,10 @@ public class GamePanel extends JPanel implements KeyListener {
         g.drawString(line.toString(), x, y);
     }
 
-    private void checkCollision() {
+    private void checkCollision() {//ตรวจจับตอนชน
         Rectangle pRect = new Rectangle(playerX + 50, playerY + 50, 50, 50);
-        if (scene == 1) nearCat = pRect.intersects(new Rectangle(catX, catY, 100, 100));
+        if (scene == 1)
+            nearCat = pRect.intersects(new Rectangle(catX, catY, 100, 100));//เช็คว่าวัตถุสองชิ้นชนกันหรือยังย่อมาจากคำว่า Intersection
         if (scene == 3) nearFrog = pRect.intersects(new Rectangle(frogX, frogY, 80, 80));
         if (scene == 4) nearGiraffe = pRect.intersects(new Rectangle(giraffeX, giraffeY, 150, 250));
         if (scene == 5) nearRabbit = pRect.intersects(new Rectangle(rabbitX, rabbitY, 80, 80));
@@ -213,16 +243,21 @@ public class GamePanel extends JPanel implements KeyListener {
         if (scene == 7) nearCapybara = pRect.intersects(new Rectangle(capybaraX, capybaraY, 120, 100));
     }
 
-    private void transitionToNextScene() {
+    private void transitionToNextScene() {//การเปลี่ยนฉากแบบค่อยๆ มืดแล้วสว่าง
         if (fadeTimer != null && fadeTimer.isRunning()) return;
         fadeTimer = new Timer(20, e -> {
             alpha += 0.05f;
             if (alpha >= 1f) {
-                alpha = 1f; scene++; playerX = 50;
-                ((Timer)e.getSource()).stop();
+                alpha = 1f;
+                scene++;
+                playerX = 50;
+                ((Timer) e.getSource()).stop();
                 Timer fadeIn = new Timer(20, ev -> {
                     alpha -= 0.05f;
-                    if (alpha <= 0f) { alpha = 0f; ((Timer)ev.getSource()).stop(); }
+                    if (alpha <= 0f) {
+                        alpha = 0f;
+                        ((Timer) ev.getSource()).stop();
+                    }
                     repaint();
                 });
                 fadeIn.start();
@@ -234,61 +269,58 @@ public class GamePanel extends JPanel implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        // --- 1. จัดการเรื่อง Choice และการข้าม (Skip) ---
-        if (showGiraffeChoice) {
+        // --- จัดการเรื่อง Choice และการข้าม (Skip) ---
+        if (showGiraffeChoice) {//เป็นลักษณะในการบังคับช้อย ซ้ายขวาในลูกศร
             if (e.getKeyCode() == KeyEvent.VK_LEFT) giraffeChoiceIndex = 0;
             if (e.getKeyCode() == KeyEvent.VK_RIGHT) giraffeChoiceIndex = 1;
             if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                 showGiraffeChoice = false;
                 if (giraffeChoiceIndex == 1) {
                     JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-                    topFrame.setContentPane(new StartPanel()); topFrame.revalidate(); topFrame.repaint();
+                    topFrame.setContentPane(new StartPanel());
+                    topFrame.revalidate();
+                    topFrame.repaint();
                 } else {
                     currentQuestions = new String[]{"ยีราฟ: งั้นก็จงแบกความเหนื่อยล้านั่นเดินต่อไป"};
                     questionIndex = 0;
                 }
             }
-            repaint(); return;
+            repaint();
+            return;
         }
 
         if (showEndChoice) {
             if (e.getKeyCode() == KeyEvent.VK_LEFT) endChoiceIndex = 0;
             if (e.getKeyCode() == KeyEvent.VK_RIGHT) endChoiceIndex = 1;
             if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                showEndChoice = false; talking = false;
+                showEndChoice = false;
+                talking = false;
                 JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
                 if (topFrame != null) {
                     MusicPlayer.stop();
                     if (endChoiceIndex == 0) topFrame.setContentPane(new BackEndingPanel());
                     else topFrame.setContentPane(new VideoPanel(playerName));
-                    topFrame.revalidate(); topFrame.repaint();
+                    topFrame.revalidate();
+                    topFrame.repaint();
                 }
             }
-            repaint(); return;
+            repaint();
+            return; //วาดหน้าจอใหม่ แล้วก็หยุด
         }
 
-        // --- 2. จัดการบทสนทนา (Enter เพื่อเลื่อน / S เพื่อ Skip) ---
+
         if (talking) {
-            // ปุ่ม S สำหรับ Skip
-            if (e.getKeyCode() == KeyEvent.VK_S) {
-                // ถ้าเป็นฉากแมวและยังไม่มีชื่อ ห้าม Skip (ต้องให้พิมพ์ชื่อก่อน)
-                if (scene == 1 && playerName.isEmpty()) {
-                    questionIndex = 2; // กระโดดไปช็อตถามชื่อเลย
-                    answerField.setVisible(true);
-                    answerField.requestFocusInWindow();
-                } else {
-                    talking = false;
-                    handleSkipToNextScene(); // เรียกฟังก์ชันข้ามฉาก
-                }
-            }
 
             if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                 if (scene == 1 && questionIndex == 2) {
-                    answerField.setVisible(true); answerField.requestFocusInWindow();
+                    answerField.setVisible(true);
+                    answerField.requestFocusInWindow();
                 } else if (scene == 3 && questionIndex == 3) {
-                    answerField.setVisible(true); answerField.requestFocusInWindow();
+                    answerField.setVisible(true);
+                    answerField.requestFocusInWindow();
                 } else if (scene == 5 && questionIndex == 2) {
-                    answerField.setVisible(true); answerField.requestFocusInWindow();
+                    answerField.setVisible(true);
+                    answerField.requestFocusInWindow();
                 } else if (scene == 4 && questionIndex == 2 && !showGiraffeChoice) {
                     showGiraffeChoice = true;
                 } else if (scene == 7 && questionIndex == 3 && !showEndChoice) {
@@ -308,13 +340,23 @@ public class GamePanel extends JPanel implements KeyListener {
         // --- 3. ระบบการเคลื่อนที่และล็อคขอบจอ ---
         int nextX = playerX;
         int nextY = playerY;
+        //คือต้องนี้เอาไว้ควบคุมการเดิน แล้วก็ปุ่มอะไรทำนองนี้ ก็ไม่รู้เหมือนกัน
+        if (e.getKeyCode() == KeyEvent.VK_UP) {
+            nextY -= speed;
+            player = playerBack;
+        }
+        if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+            nextY += speed;
+            player = playerFront;
+        }
+        if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+            nextX -= speed;
+        }
+        if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+            nextX += speed;
+        }
 
-        if (e.getKeyCode() == KeyEvent.VK_UP) { nextY -= speed; player = playerBack; }
-        if (e.getKeyCode() == KeyEvent.VK_DOWN) { nextY += speed; player = playerFront; }
-        if (e.getKeyCode() == KeyEvent.VK_LEFT) { nextX -= speed; }
-        if (e.getKeyCode() == KeyEvent.VK_RIGHT) { nextX += speed; }
-
-        // กฎการล็อคขอบ (Boundary)
+        // กฎการล็อคขอบ
         if (nextX < 0) nextX = 0;
         if (nextY < 200) nextY = 200;
         if (nextY > 450) nextY = 450;
@@ -332,19 +374,38 @@ public class GamePanel extends JPanel implements KeyListener {
         playerY = nextY;
 
         // --- 4. ปุ่ม E เพื่อเริ่มคุย ---
-        if (e.getKeyCode() == KeyEvent.VK_E) {
-            if (nearCat && scene == 1) { talking = true; currentQuestions = catDialogue; questionIndex = 0; }
-            else if (nearFrog && scene == 3) { talking = true; currentQuestions = frogDialogue; questionIndex = 0; }
-            else if (nearGiraffe && scene == 4) { talking = true; currentQuestions = giraffeDialogue; questionIndex = 0; }
-            else if (nearRabbit && scene == 5) { talking = true; currentQuestions = rabbitDialogue; questionIndex = 0; }
-            else if (nearTurtle && scene == 6) { talking = true; currentQuestions = turtleDialogue; questionIndex = 0; }
-            else if (nearCapybara && scene == 7) { talking = true; currentQuestions = capyDialogue; questionIndex = 0; }
+        if (e.getKeyCode() == KeyEvent.VK_E) {//Virtual Key E //ปุ่มที่ผู้เล่นกดลงไปคือปุ่ม E หรือไม่
+            if (nearCat && scene == 1) {
+                talking = true;
+                currentQuestions = catDialogue;
+                questionIndex = 0;
+            } else if (nearFrog && scene == 3) {
+                talking = true;
+                currentQuestions = frogDialogue;
+                questionIndex = 0;
+            } else if (nearGiraffe && scene == 4) {
+                talking = true;
+                currentQuestions = giraffeDialogue;
+                questionIndex = 0;
+            } else if (nearRabbit && scene == 5) {
+                talking = true;
+                currentQuestions = rabbitDialogue;
+                questionIndex = 0;
+            } else if (nearTurtle && scene == 6) {
+                talking = true;
+                currentQuestions = turtleDialogue;
+                questionIndex = 0;
+            } else if (nearCapybara && scene == 7) {
+                talking = true;
+                currentQuestions = capyDialogue;
+                questionIndex = 0;
+            }
         }
         repaint();
     }
 
     // ฟังก์ชันช่วยย้ายฉาก (เรียกใช้ตอนคุยจบ หรือ กด Skip)
-    private void handleSkipToNextScene() {
+    private void handleSkipToNextScene() {//ใช้ตรงนี้แทน
         JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         if (topFrame == null) return;
 
@@ -357,7 +418,7 @@ public class GamePanel extends JPanel implements KeyListener {
         topFrame.revalidate();
         topFrame.repaint();
     }
-    private void handleDialogueEnd() {
+    /*private void handleDialogueEnd() {//ไม่ได้ใช้ เพราะมีตัวสคลิปแล้ว
         JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         if (topFrame == null) return;
 
@@ -374,10 +435,15 @@ public class GamePanel extends JPanel implements KeyListener {
             topFrame.setContentPane(new UniversityResultPanel(this.playerName));
         }
 
-        topFrame.revalidate();
+        topFrame.revalidate();//แผ่นใหม่ให้เข้าที่เข้าทางตาม Layout ที่เรากำหนดไว้
         topFrame.repaint();
-    }
+    }*/
 
-    @Override public void keyReleased(KeyEvent e) {}
-    @Override public void keyTyped(KeyEvent e) {}
+    @Override
+    public void keyReleased(KeyEvent e) {
+    }//ครบตามกฎ
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
 }

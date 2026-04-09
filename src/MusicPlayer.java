@@ -20,8 +20,7 @@ public class MusicPlayer {
             musicClip.start();
         } catch (Exception e) { e.printStackTrace(); }
     }
-
-    public static void playSFX(String path) {
+    public static void playSFX(String path) {//เสียงเอฟเฟก แต่ไม่ได้ใช้555555555
         try {
             URL url = MusicPlayer.class.getResource(path);
             if (url == null) return;
@@ -31,6 +30,7 @@ public class MusicPlayer {
             sfxClip.start();
         } catch (Exception e) { e.printStackTrace(); }
     }
+
 
     public static void stop() {
         if (musicClip != null) {

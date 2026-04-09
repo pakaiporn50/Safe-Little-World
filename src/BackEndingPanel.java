@@ -1,7 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 
-public class BackEndingPanel extends JPanel {
+public class BackEndingPanel extends JPanel {//หน้าจอฉากต่างๆ"
 
     int textY = 600;
     String[] lines = {

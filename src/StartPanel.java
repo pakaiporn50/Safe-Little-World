@@ -18,7 +18,7 @@ public class StartPanel extends JPanel {
         bgLabel.setBounds(0, 0, 800, 600);
         this.add(bgLabel);
         bgLabel.setLayout(null);
-        // 🏷️ ชื่อเกม (รูป)
+        // ชื่อเกม (รูป)
         System.out.println(getClass().getResource("/images/name_game.png"));
         JLabel title = new JLabel(
                 new ImageIcon(getClass().getResource("/images/name_game.png"))
@@ -26,7 +26,7 @@ public class StartPanel extends JPanel {
         title.setBounds(0, 0, 800, 600);
 
 
-// ❗ ใส่ลงใน bgLabel เหมือนปุ่ม
+//ใส่ลงใน bgLabel เหมือนปุ่ม
         bgLabel.add(title);
 
 
@@ -55,6 +55,7 @@ public class StartPanel extends JPanel {
         bgLabel.add(title);
         playMusic("/images/opengame.wav");
     }
+
     public void playMusic(String soundFile) {//หาไฟล์เสียง
         try {
             InputStream audioSrc = getClass().getResourceAsStream(soundFile);
